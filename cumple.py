@@ -112,8 +112,8 @@ def construir_driver():
     from selenium.webdriver.chrome.service import Service
     from selenium import webdriver
 
-    CHROME_BIN = os.getenv("CHROME_BIN", "/usr/bin/chromium")
-    CHROMEDRIVER = os.getenv("CHROMEDRIVER", "/usr/bin/chromedriver")
+    CHROME_BIN = os.getenv("CHROME_BIN", "/usr/bin/google-chrome")
+    CHROMEDRIVER = os.getenv("CHROMEDRIVER", "/usr/local/bin/chromedriver")
 
     ua = (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
