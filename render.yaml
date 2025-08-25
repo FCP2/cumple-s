@@ -5,7 +5,7 @@ services:
     plan: free
     autoDeploy: true
     disk:
-      name: perfil-chrome
+      name: perfil-chrome-v2
       mountPath: /data
       sizeGB: 1
     healthCheckPath: /
