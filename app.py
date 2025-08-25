@@ -7,7 +7,7 @@ from threading import Thread
 # ========================
 PERSIST_DIR = os.getenv("PERSIST_DIR", "/data")
 QR_PATH = os.path.join(PERSIST_DIR, "qr.png")
-PROFILE_DIR = os.path.join(PERSIST_DIR, "chrome-profile")
+PROFILE_DIR = os.getenv("PROFILE_DIR", os.path.join(PERSIST_DIR, "chrome-profile"))
 RUN_TOKEN = os.getenv("RUN_TOKEN")  # opcional, para proteger endpoints
 
 # ========================
