@@ -48,6 +48,9 @@ NUMEROS_DESTINATARIOS = [
 PERSIST_DIR = os.getenv("PERSIST_DIR", "/data")
 PROFILE_DIR = os.getenv("PROFILE_DIR", os.path.join(PERSIST_DIR, "chrome-profile"))
 QR_PATH = os.path.join(PERSIST_DIR, "qr.png")
+# 👇 añade esto una vez, por ejemplo justo después de estas líneas:
+import pathlib
+pathlib.Path(PROFILE_DIR).mkdir(parents=True, exist_ok=True)
 
 WHATSAPP_URL = "https://web.whatsapp.com/send?phone={telefono}&text={mensaje}"
 TIEMPO_CARGA_WA = int(os.getenv("TIEMPO_CARGA_WA", "12"))
