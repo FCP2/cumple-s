@@ -18,6 +18,19 @@ from selenium.webdriver.support import expected_conditions as EC
 # --- agrega arriba (junto a imports y constantes) ---
 LOCK_NAMES = ["SingletonLock", "SingletonCookie", "SingletonSocket", "SingletonIPC"]
 
+def clear_profile_locks():
+    removed = []
+    for name in LOCK_NAMES:
+        p = os.path.join(PROFILE_DIR, name)
+        try:
+            if os.path.exists(p):
+                os.remove(p)
+                removed.append(name)
+        except Exception as e:
+            print(f"[clear_profile_locks] No pude borrar {name}: {e}")
+    if removed:
+        print("[clear_profile_locks] Eliminados:", ", ".join(removed))
+
 # =========================
 # Configuración por entorno
 # =========================
@@ -91,7 +104,6 @@ def dias_hasta_proximo(dia, mes, hoy=None):
     evento_sig = _safe_date(next_year, mes, dia)
     return (evento_sig - hoy).days, next_year
 
-
 # =========================
 # Google Sheets
 # =========================
@@ -105,18 +117,7 @@ def abrir_worksheet():
     # si no se especifica, usa la primera hoja
     return sh.get_worksheet(0)
 
-def clear_profile_locks():
-    removed = []
-    for name in LOCK_NAMES:
-        p = os.path.join(PROFILE_DIR, name)
-        try:
-            if os.path.exists(p):
-                os.remove(p)
-                removed.append(name)
-        except Exception as e:
-            print(f"[clear_profile_locks] No pude borrar {name}: {e}")
-    if removed:
-        print("[clear_profile_locks] Eliminados:", ", ".join(removed))
+
 # =========================
 # Selenium / WhatsApp
 # =========================
