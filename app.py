@@ -53,7 +53,24 @@ def qr():
     if os.path.exists(QR_PATH):
         return send_file(QR_PATH, mimetype="image/png")
     return Response("No hay QR aún. Genera abriendo WhatsApp en tu script y guardando /data/qr.png.", 404)
+# -- WARMUP: genera QR sin correr todo el job --
+from threading import Thread
 
+def _generate_qr():
+    try:
+        # Reusamos funciones de cumple.py
+        from cumple import construir_driver, asegurar_sesion_whatsapp
+        d = construir_driver()
+        asegurar_sesion_whatsapp(d)  # aquí se guarda /data/qr.png
+        d.quit()
+    except Exception as e:
+        print("Warmup error:", e)
+
+@app.get("/warmup")
+def warmup():
+    Thread(target=_generate_qr).start()
+    return "OK: generando QR en background. Abre /qr en ~10-15s.", 202
+    
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "10000"))
     app.run(host="0.0.0.0", port=port)
