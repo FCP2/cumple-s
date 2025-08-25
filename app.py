@@ -1,4 +1,4 @@
-import os, importlib, subprocess, shutil
+import os, importlib, subprocess, shutil, time
 from flask import Flask, jsonify, send_file, Response, request
 from threading import Thread
 
@@ -29,6 +29,20 @@ RUNNING = False
 # ========================
 def _auth_ok(req):
     return (RUN_TOKEN is None) or (req.args.get("key") == RUN_TOKEN)
+
+# ========================
+# Helpers de sistema
+# ========================
+def _kill_chrome_procs():
+    """Mata cualquier chrome/chromedriver colgado para liberar el perfil."""
+    try:
+        subprocess.run(
+            ["bash", "-lc", "pkill -f chrome || true; pkill -f chromedriver || true"],
+            check=False
+        )
+        time.sleep(1)
+    except Exception as e:
+        print("kill chrome err:", e)
 
 # ========================
 # Ejecución del script
@@ -69,7 +83,10 @@ def run():
 # --- Warmup para generar QR en background ---
 def _generate_qr():
     try:
-        from cumple import construir_driver, asegurar_sesion_whatsapp
+        # Matar procesos y limpiar locks antes de abrir
+        _kill_chrome_procs()
+        from cumple import clear_profile_locks, construir_driver, asegurar_sesion_whatsapp
+        clear_profile_locks()
         d = construir_driver()
         asegurar_sesion_whatsapp(d)
         d.quit()
@@ -83,11 +100,20 @@ def warmup():
     global RUNNING
     if RUNNING:
         return "Ya hay un Chrome abierto, espera a que termine", 409
-    Thread(target=_generate_qr).start()
-    return "OK: generando QR en background. Abre /qr en ~15-25s.", 202
+    RUNNING = True
+    def _job():
+        try:
+            _generate_qr()
+        finally:
+            global RUNNING
+            RUNNING = False
+    Thread(target=_job).start()
+    return "OK: generando QR en background. Abre /qr en ~20-25s.", 202
 
 @app.get("/qr")
 def qr():
+    if not _auth_ok(request):
+        return "Unauthorized", 401
     if os.path.exists(QR_PATH):
         return send_file(QR_PATH, mimetype="image/png")
     return Response("No hay QR aún. Genera abriendo WhatsApp en tu script y guardando /data/qr.png.", 404)
@@ -145,6 +171,13 @@ def unlink():
         return jsonify({"ok": True, "msg": "Perfil no existía. Puedes hacer /warmup."})
     except Exception as e:
         return jsonify({"ok": False, "error": repr(e)}), 500
+
+@app.get("/killchrome")
+def killchrome():
+    if not _auth_ok(request):
+        return jsonify({"ok": False, "msg": "Unauthorized"}), 401
+    _kill_chrome_procs()
+    return jsonify({"ok": True})
 
 # ========================
 # Arranque
