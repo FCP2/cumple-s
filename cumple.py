@@ -155,7 +155,7 @@ def asegurar_sesion_whatsapp(driver):
     driver.get("https://web.whatsapp.com/")
 
     # Aumenta el tiempo de carga base
-    base_wait = max(TIEMPO_CARGA_WA, 15)
+    base_wait = max(TIEMPO_CARGA_WA, 20)
 
     def _wait_qr_once(timeout):
         try:
