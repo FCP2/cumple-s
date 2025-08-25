@@ -13,7 +13,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # =========================
 # Configuración por entorno
@@ -133,7 +134,11 @@ def construir_driver():
     opts.add_argument("--disable-blink-features=AutomationControlled")
     opts.add_experimental_option("excludeSwitches", ["enable-automation"])
     opts.add_experimental_option("useAutomationExtension", False)
-
+    opts.add_argument("--disable-gpu")
+    opts.add_argument("--lang=es-ES,es")
+    # si el QR sigue tardando en pintar en headless, prueba a subir el tamaño o el scale:
+    # opts.add_argument("--window-size=1440,1000")
+    # opts.add_argument("--force-device-scale-factor=1.25")
     service = Service(CHROMEDRIVER)                              # 2) chromedriver correcto
     driver = webdriver.Chrome(service=service, options=opts)
 
@@ -148,7 +153,36 @@ def construir_driver():
 
 def asegurar_sesion_whatsapp(driver):
     driver.get("https://web.whatsapp.com/")
-    time.sleep(TIEMPO_CARGA_WA)
+
+    # Aumenta el tiempo de carga base
+    base_wait = max(TIEMPO_CARGA_WA, 15)
+
+    def _wait_qr_once(timeout):
+        try:
+            # WhatsApp dibuja el QR en un <canvas>. Esperamos a que exista.
+            WebDriverWait(driver, timeout).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, "canvas[aria-label='Scan me!'], canvas")
+                )
+            )
+            # Pausa muy corta para asegurar que el canvas ya pintó
+            time.sleep(1.5)
+            return True
+        except Exception:
+            return False
+
+    # Primer intento
+    ok = _wait_qr_once(base_wait)
+
+    # Si no apareció, recarga una vez y vuelve a intentar con más tiempo
+    if not ok:
+        try:
+            driver.execute_script("location.reload()")
+        except Exception:
+            driver.get("https://web.whatsapp.com/")
+        ok = _wait_qr_once(base_wait + 15)
+
+    # Guarda screenshot aunque ya haya sesión (no pasa nada)
     try:
         driver.save_screenshot(QR_PATH)
     except Exception:
