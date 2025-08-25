@@ -2,4 +2,4 @@ flask
 pandas
 gspread
 oauth2client
-selenium
+selenium>=4.20
