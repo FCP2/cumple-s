@@ -31,7 +31,7 @@ NUMEROS_DESTINATARIOS = [
 ]
 
 PERSIST_DIR = os.getenv("PERSIST_DIR", "/data")
-PROFILE_DIR = os.path.join(PERSIST_DIR, "chrome-profile")
+PROFILE_DIR = os.path.join(PERSIST_DIR, "chrome-profile-2")
 QR_PATH = os.path.join(PERSIST_DIR, "qr.png")
 
 WHATSAPP_URL = "https://web.whatsapp.com/send?phone={telefono}&text={mensaje}"
