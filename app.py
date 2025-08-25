@@ -76,6 +76,20 @@ def ls():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.get("/clearlocks")
+def clearlocks():
+    import glob
+    removed = []
+    for patt in ["SingletonLock", "SingletonCookie", "SingletonSocket", "SingletonIPC"]:
+        path = os.path.join(PROFILE_DIR, patt)
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+                removed.append(patt)
+            except Exception as e:
+                return f"Error removing {patt}: {e}", 500
+    return {"ok": True, "removed": removed}
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "10000"))
     app.run(host="0.0.0.0", port=port)
