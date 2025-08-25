@@ -108,16 +108,16 @@ def abrir_worksheet():
 # =========================
 def construir_driver():
     opts = Options()
-    # binario de Chromium es el del contenedor (variable la maneja Dockerfile)
+    opts.binary_location = os.getenv("CHROME_BIN", "/usr/bin/chromium")  # 👈 aseguramos binario
+
     opts.add_argument(f"--user-data-dir={PROFILE_DIR}")
     opts.add_argument("--profile-directory=Default")
     opts.add_argument("--window-size=1280,900")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
-    # headless en servidor
     opts.add_argument("--headless=new")
 
-    service = Service()  # chromedriver en PATH del contenedor
+    service = Service(os.getenv("CHROMEDRIVER", "/usr/bin/chromedriver"))
     driver = webdriver.Chrome(service=service, options=opts)
     return driver
 
