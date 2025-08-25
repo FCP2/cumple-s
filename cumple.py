@@ -107,18 +107,42 @@ def abrir_worksheet():
 # Selenium / WhatsApp
 # =========================
 def construir_driver():
-    opts = Options()
-    opts.binary_location = os.getenv("CHROME_BIN", "/usr/bin/chromium")  # 👈 aseguramos binario
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
+    from selenium import webdriver
 
+    CHROME_BIN = os.getenv("CHROME_BIN", "/usr/bin/chromium")
+    CHROMEDRIVER = os.getenv("CHROMEDRIVER", "/usr/bin/chromedriver")
+
+    ua = (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/123.0.0.0 Safari/537.36"
+    )
+
+    opts = Options()
+    opts.binary_location = CHROME_BIN                            # 1) binario correcto
     opts.add_argument(f"--user-data-dir={PROFILE_DIR}")
     opts.add_argument("--profile-directory=Default")
     opts.add_argument("--window-size=1280,900")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
-    opts.add_argument("--headless=new")
+    opts.add_argument("--headless=new")                          # headless moderno
+    opts.add_argument(f"--user-agent={ua}")                      # 3) UA de Chrome “normal”
+    # Opcional: reduce huella de “automatizado”
+    opts.add_argument("--disable-blink-features=AutomationControlled")
+    opts.add_experimental_option("excludeSwitches", ["enable-automation"])
+    opts.add_experimental_option("useAutomationExtension", False)
 
-    service = Service(os.getenv("CHROMEDRIVER", "/usr/bin/chromedriver"))
+    service = Service(CHROMEDRIVER)                              # 2) chromedriver correcto
     driver = webdriver.Chrome(service=service, options=opts)
+
+    # Loguea el UA real para verificar en logs de Render
+    try:
+        print("UA:", driver.execute_script("return navigator.userAgent"))
+    except Exception:
+        pass
+
     return driver
 
 
