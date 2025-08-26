@@ -4,8 +4,25 @@ services:
     env: docker
     plan: free
     autoDeploy: true
+    healthCheckPath: /
     disk:
-      name: perfil-chrome-v3
+      name: perfil-chrome-v4         # 🔹 Nombre del disco (cámbialo si creas otro servicio limpio)
       mountPath: /data
       sizeGB: 1
-    healthCheckPath: /
+    envVars:
+      - key: PERSIST_DIR
+        value: /data
+      - key: PROFILE_DIR
+        value: /data/chrome-profile-fresh   # 🔹 Perfil limpio (puedes cambiarlo si quieres reiniciar sesión)
+      - key: RUN_TOKEN
+        value: T3cn0l0g1c$                  # 🔹 Tu token secreto
+      - key: HEADLESS
+        value: "false"                      # 🔹 Primero sin headless para escanear QR
+      - key: TIEMPO_CARGA_WA
+        value: "25"                         # 🔹 Espera más tiempo para cargar QR
+      - key: TZ
+        value: America/Mexico_City          # 🔹 Zona horaria
+      - key: SHEET_NAME
+        value: cumpleanos_ejemplo           # 🔹 Nombre de tu Google Sheet
+      - key: GOOGLE_CREDENTIALS_JSON
+        sync: false                         # 🔹 Pon aquí el JSON de la cuenta de servicio vía dashboard
