@@ -34,16 +34,18 @@ def _auth_ok(req):
 # Helpers de sistema
 # ========================
 def _kill_chrome_procs():
-    """Mata cualquier chrome/chromedriver colgado para liberar el perfil."""
     try:
-        subprocess.run(
-            ["bash", "-lc", "pkill -f chrome || true; pkill -f chromedriver || true"],
-            check=False
-        )
+        # mata distintas variantes de procesos
+        cmd = r"""
+        pkill -9 -f google-chrome || true
+        pkill -9 -f chrome --type= || true
+        pkill -9 -f chrome --headless || true
+        pkill -9 -f chromedriver || true
+        """
+        subprocess.run(["bash","-lc", cmd], check=False)
         time.sleep(1)
     except Exception as e:
         print("kill chrome err:", e)
-
 # ========================
 # Ejecución del script
 # ========================
